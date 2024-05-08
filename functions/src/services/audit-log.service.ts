@@ -15,13 +15,11 @@ export default class AuditLogService {
     };
 
     getAuditLogs = async () => {
-        console.log("in service");
         const snapshot = await auditLogCollection.get();
         const data: AuditLog[] = [];
         snapshot.forEach((doc) => {
             data.push(doc.data() as AuditLog);
         });
-        console.log(data, "data");
         return data;
     };
 

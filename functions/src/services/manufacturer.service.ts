@@ -1,6 +1,7 @@
 import { Manufacturer } from "../models/manufacturer.js";
 import { firebaseDB } from "../config/firebase.config.js";
 import { FIREBASE_CONSTANTS } from "../constants/firebase.js";
+import { ERROR_MESSAGES } from "../constants/error.js";
 
 const manufacturersCollection = firebaseDB.collection(
     FIREBASE_CONSTANTS.FIRESTORE.MANUFACTURERS
@@ -22,7 +23,7 @@ export class ManufacturerService {
         const docRef = manufacturersCollection.doc(manufacturerId);
         const doc = await docRef.get();
         if (!doc.exists) {
-            throw new Error("MANUFACTURER_NOT_EXISTS");
+            throw new Error(ERROR_MESSAGES.MANUFACTURER.MANUFACTURER_NOT_EXISTS);
         } else {
             return doc.data() as Manufacturer;
         }

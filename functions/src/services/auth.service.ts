@@ -12,6 +12,7 @@ import { UserMapper } from "../mappers/user.mapper.js";
 import EmailService from "./email.service.js";
 import CustomError from "../models/customError.js";
 import OptService from "./otp.service.js";
+import { ERROR_MESSAGES } from "../constants/error.js";
 
 export class AuthService {
     private userService: UserService;
@@ -27,16 +28,16 @@ export class AuthService {
         try {
             user = await this.userService.getUserByEmail(email);
         } catch (err: any) {
-            throw new CustomError("INVALID_CREDS", 401);
+            throw new CustomError(ERROR_MESSAGES.AUTH.INVALID_CREDS, 401);
         }
 
         if (!user.isActive) {
-            throw new CustomError("INACTIVE_USER", 401);
+            throw new CustomError(ERROR_MESSAGES.AUTH.INACTIVE_USER, 401);
         }
 
         //Step1: If account is locked, then ask to contact system admin.
         if (user.isLocked) {
-            throw new CustomError("ACCOUNT_LOCKED", 401);
+            throw new CustomError(ERROR_MESSAGES.AUTH.ACCOUNT_LOCKED, 401);
         }
         const isUserAuthanticated = compareText(
             password,
@@ -65,10 +66,10 @@ export class AuthService {
             ) {
                 user.isLocked = true;
                 await this.userService.updateUser(user);
-                throw new CustomError("ACCOUNT_LOCKED", 401);
+                throw new CustomError(ERROR_MESSAGES.AUTH.ACCOUNT_LOCKED, 401);
             }
             await this.userService.updateUser(user);
-            throw new CustomError("INVALID_CREDS", 401);
+            throw new CustomError(ERROR_MESSAGES.AUTH.INVALID_CREDS, 401);
         }
         const userMapper = new UserMapper();
         const userResponse: UserResponse =
@@ -92,7 +93,7 @@ export class AuthService {
 
     forgotPassword = async (email: string) => {
         const user: User = await this.userService.getUserByEmail(email);
-        if (!user) throw new Error("USER_NOT_REGISTERED");
+        if (!user) throw new Error(ERROR_MESSAGES.USER.USER_NOT_REGISTERED);
 
         //Step1 : Generate code and save it in database with hashed version
         const code = generateRandomText(5);
@@ -136,7 +137,7 @@ export class AuthService {
 
     sendOtp = async (email: string) => {
         const user: User = await this.userService.getUserByEmail(email);
-        if (!user) throw new CustomError("USER_NOT_REGISTERED", 401);
+        if (!user) throw new CustomError(ERROR_MESSAGES.USER.USER_NOT_REGISTERED, 401);
 
         //Step1 : Generate code and save it in database with hashed version
         const code = generateRandomText(5);
@@ -187,20 +188,20 @@ export class AuthService {
     verifyOtp = async (otp: string, email: string, target: string) => {
         //Step1: Check reset password token exist for user
         const user: User = await this.userService.getUserByEmail(email);
-        if (!user) throw new CustomError("USER_NOT_REGISTERED", 401);
+        if (!user) throw new CustomError(ERROR_MESSAGES.USER.USER_NOT_REGISTERED, 401);
 
         if (!user.currentOtp?.hash)
-            throw new CustomError("INVALID_VERIFY_REQUEST", 200);
+            throw new CustomError(ERROR_MESSAGES.AUTH.INVALID_VERIFY_REQUEST, 200);
 
         if (user.currentOtp.isVerified) {
-            throw new CustomError("OTP_ALREDAY_VERIFIED", 200);
+            throw new CustomError(ERROR_MESSAGES.AUTH.OTP_ALREDAY_VERIFIED, 200);
         }
 
         const expiryDate = user.currentOtp.expiredTime;
         const now = Timestamp.now();
 
         if (expiryDate.seconds < now.seconds) {
-            throw new CustomError("EXPIRED_CODE", 403);
+            throw new CustomError(ERROR_MESSAGES.AUTH.EXPIRED_CODE, 403);
         }
         //Step2: Compare code from body and database with hash
         const isValid: boolean = compareText(
@@ -208,7 +209,7 @@ export class AuthService {
             user.currentOtp.hash,
             user.currentOtp.salt
         );
-        if (!isValid) throw new CustomError("INVALID_CODE", 403);
+        if (!isValid) throw new CustomError(ERROR_MESSAGES.AUTH.INVALID_CODE, 403);
         if (target == "account-lockout") {
             (user.invalidAttempt as any) = FieldValue.delete();
             (user.currentOtp as any) = FieldValue.delete();
@@ -224,16 +225,16 @@ export class AuthService {
     resetPassword = async (email: string, newPassword: string) => {
         //Step1: Check reset password token exist for user
         const user: User = await this.userService.getUserByEmail(email);
-        if (!user) throw new Error("USER_NOT_REGISTERED");
+        if (!user) throw new Error(ERROR_MESSAGES.USER.USER_NOT_REGISTERED);
 
         if (!(user.currentOtp?.hash && user.currentOtp?.isVerified))
-            throw new Error("INVALID_RESET_REQUEST");
+            throw new Error(ERROR_MESSAGES.AUTH.INVALID_RESET_REQUEST);
 
         const expiryDate = user.currentOtp.expiredTime;
         const now = Timestamp.now();
 
         if (expiryDate.seconds < now.seconds) {
-            throw new Error("EXPIRED_CODE");
+            throw new Error(ERROR_MESSAGES.AUTH.EXPIRED_CODE);
         }
 
         //Step2: Update new password

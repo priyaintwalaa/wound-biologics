@@ -7,6 +7,7 @@ import { UserMapper } from "../mappers/user.mapper.js";
 import CustomError from "../models/customError.js";
 import asyncHandler from "../utils/catchAsync.util.js";
 import { ExtendedExpressRequest } from "../models/extendedExpressRequest.js";
+import { ERROR_MESSAGES } from "../constants/error.js";
 
 export class UserController {
     private userService: UserService;
@@ -53,7 +54,7 @@ export class UserController {
         async (req: ExtendedExpressRequest, res: Response) => {
             //Step1: Allow only if have valid API key to create system admin
             if (req.headers["x-api-key"] != process.env.SYSTEM_ADMIN_KEY) {
-                throw new CustomError("Unauthorized", 401);
+                throw new CustomError(ERROR_MESSAGES.UNAUTHORIZED, 401);
             }
             //Step2: Add system admin in DB
             const user: User = req.body;

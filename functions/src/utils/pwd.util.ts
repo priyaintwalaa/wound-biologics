@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { logger } from "firebase-functions";
+import { ERROR_MESSAGES } from "../constants/error.js";
 
 export function generateRandomText(length: number) {
     return crypto.randomBytes(length).toString("hex").substring(0, length);
@@ -14,7 +15,7 @@ export function hashRandomText(text: string) {
         return { salt, hashedText };
     } catch (err: any) {
         logger.error("Error while hashing text", err.message);
-        throw new Error("HASH_TEXT_ERR");
+        throw new Error(ERROR_MESSAGES.UTILS.HASH_TEXT_ERR);
     }
 }
 
@@ -30,6 +31,6 @@ export function compareText(
         return hashOfPlainText === exisitingHash;
     } catch (err: any) {
         logger.error("Error while compare text", err.message);
-        throw new Error("COMPARE_TEXT_ERR");
+        throw new Error(ERROR_MESSAGES.UTILS.COMPARE_TEXT_ERR);
     }
 }

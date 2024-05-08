@@ -2,6 +2,7 @@ import { Patient } from "../models/patient.js";
 import { firebaseDB } from "../config/firebase.config.js";
 import { FIREBASE_CONSTANTS } from "../constants/firebase.js";
 import { FieldValue } from "firebase-admin/firestore";
+import { ERROR_MESSAGES } from "../constants/error.js";
 
 const patientsCollection = firebaseDB.collection(
     FIREBASE_CONSTANTS.FIRESTORE.PATIENTS
@@ -48,7 +49,7 @@ export class PatientService {
         const docRef = patientsCollection.doc(patientId);
         const doc = await docRef.get();
         if (!doc.exists) {
-            throw new Error("PATIENT_NOT_EXISTS");
+            throw new Error(ERROR_MESSAGES.PATIENT.PATIENT_NOT_EXISTS);
         } else {
             return doc.data() as Patient;
         }

@@ -7,6 +7,7 @@ import { logger } from "firebase-functions";
 import EmailService from "./email.service.js";
 import { UserMapper } from "../mappers/user.mapper.js";
 import { AuthService } from "./auth.service.js";
+import { ERROR_MESSAGES } from "../constants/error.js";
 
 const usersCollection = firebaseDB.collection(
     FIREBASE_CONSTANTS.FIRESTORE.USERS
@@ -19,7 +20,7 @@ export default class UserService {
         const docRef = usersCollection.doc(userId);
         const doc = await docRef.get();
         if (!doc.exists) {
-            throw new Error("USER_NOT_EXISTS");
+            throw new Error(ERROR_MESSAGES.USER.USER_NOT_EXISTS);
         } else {
             return doc.data() as User;
         }
@@ -30,7 +31,7 @@ export default class UserService {
         const snapshot = await docRef.where("email", "==", email).get();
         if (snapshot.empty) {
             console.log("No matching documents.");
-            throw new Error("USER_NOT_REGISTERED");
+            throw new Error(ERROR_MESSAGES.USER.USER_NOT_REGISTERED);
         }
         const user = snapshot.docs[0].data() as User;
         user.id = snapshot.docs[0].id;
@@ -54,7 +55,7 @@ export default class UserService {
         isSuperTest: boolean = false
     ): Promise<{ [key: string]: any }> => {
         const isUserExists: boolean = await this.userExists(user.email);
-        if (isUserExists) throw new Error("USER_EXISTS");
+        if (isUserExists) throw new Error(ERROR_MESSAGES.USER.USER_EXISTS);
         let password;
         if (isSuperTest) {
             password = process.env.TEST_USER_PWD;

@@ -5,6 +5,7 @@ import { NextFunction, Response } from "express";
 import { ExtendedExpressRequest } from "../models/extendedExpressRequest.js";
 import { logger } from "firebase-functions";
 import { firebaseAuth } from "../config/firebase.config.js";
+import { ERROR_MESSAGES } from "../constants/error.js";
 
 export function verifyToken(
     req: ExtendedExpressRequest,
@@ -12,13 +13,13 @@ export function verifyToken(
     next: NextFunction
 ) {
     const authHeader = req.header("Authorization");
-    if (!authHeader) return next(new CustomError("Unauthorized", 401));
+    if (!authHeader) return next(new CustomError(ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED, 401));
     // Split header and check format
     const parts = authHeader.split(" ");
     if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") {
         return res
             .status(401)
-            .json({ message: "Invalid authorization format" });
+            .json({ message: ERROR_MESSAGES.MIDDLEWARE.INVALID_AUTHORIZATION_FORMAT});
     }
     // Extract the token
     const token = parts[1];
@@ -32,9 +33,9 @@ export function verifyToken(
         next();
     } catch (err: any) {
         if (err.name == "TokenExpiredError") {
-            next(new CustomError("SESSION_EXPIRED", 401));
+            next(new CustomError(ERROR_MESSAGES.MIDDLEWARE.SESSION_EXPIRED, 401));
         } else {
-            next(new CustomError("Unauthorized", 401));
+            next(new CustomError(ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED, 401));
         }
     }
 }
@@ -46,7 +47,7 @@ export function verifyRole(expectedRole: string[]) {
         next: NextFunction
     ) {
         if (expectedRole.includes(req.user.role)) next();
-        else next(new CustomError("Unauthorized", 401));
+        else next(new CustomError(ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED, 401));
     };
 }
 
@@ -62,11 +63,11 @@ export const isCompanyAdmin = async (
         ) {
             next();
         } else {
-            next(new CustomError("Unauthorized", 401));
+            next(new CustomError(ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED, 401));
         }
     } catch (e) {
         console.log(e);
-        return res.status(401).json({ message: "Unauthenticated" });
+        return res.status(401).json({ message: ERROR_MESSAGES.MIDDLEWARE.UNAUTHENTICATED });
     }
 };
 
@@ -83,23 +84,23 @@ export const isSystemAdminOrCompanyAdmin = async (
         ) {
             next();
         } else {
-            next(new CustomError("Unauthorized", 401));
+            next(new CustomError(ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED, 401));
         }
     } catch (e) {
         console.log(e);
-        return res.status(401).json({ message: "Unauthenticated" });
+        return res.status(401).json({ message: ERROR_MESSAGES.MIDDLEWARE.UNAUTHENTICATED });
     }
 };
 
 export const verifyFirebaseIdToken = async (req, res, next) => {
     const authHeader = req.header("Authorization");
-    if (!authHeader) return next(new CustomError("Unauthorized", 401));
+    if (!authHeader) return next(new CustomError(ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED, 401));
     // Split header and check format
     const parts = authHeader.split(" ");
     if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") {
         return res
             .status(401)
-            .json({ message: "Invalid authorization format" });
+            .json({ message: ERROR_MESSAGES.MIDDLEWARE.INVALID_AUTHORIZATION_FORMAT});
     }
     // Extract the token
     const token = parts[1];
@@ -111,6 +112,6 @@ export const verifyFirebaseIdToken = async (req, res, next) => {
         }
     } catch (e) {
         console.log(e);
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED });
     }
 };

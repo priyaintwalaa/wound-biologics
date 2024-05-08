@@ -6,6 +6,7 @@ import { FIREBASE_CONSTANTS } from "../constants/firebase.js";
 import { OrderStatus } from "../constants/enums.js";
 import { convertToJsDate } from "../utils/firbase.util.js";
 import { logger } from "firebase-functions";
+import { ERROR_MESSAGES } from "../constants/error.js";
 
 const ordersCollection = firebaseDB.collection(
     FIREBASE_CONSTANTS.FIRESTORE.ORDERS
@@ -96,7 +97,7 @@ export default class OrderService {
         const orderRef = ordersCollection.doc(orderId);
         const doc = await orderRef.get();
         if (!doc.exists) {
-            throw new Error("ORDER_NOT_EXISTS");
+            throw new Error(ERROR_MESSAGES.ORDER.ORDER_NOT_EXISTS);
         } else {
             const order = doc.data();
             order.id = doc.id;

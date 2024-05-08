@@ -1,4 +1,5 @@
 import { firebaseDB } from "../config/firebase.config.js";
+import { ERROR_MESSAGES } from "../constants/error.js";
 import { FIREBASE_CONSTANTS } from "../constants/firebase.js";
 import { Company } from "../models/company.js";
 // import { User } from "../models/user.js";
@@ -14,7 +15,7 @@ export default class CompanyService {
         const docRef = companiesCollection.doc(userId);
         const doc = await docRef.get();
         if (!doc.exists) {
-            throw new Error("COMPANY_NOT_EXISTS");
+            throw new Error(ERROR_MESSAGES.COMPANY.COMPANY_NOT_EXISTS);
         } else {
             return doc.data() as Company;
         }
