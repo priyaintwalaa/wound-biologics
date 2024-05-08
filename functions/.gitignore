@@ -1,0 +1,20 @@
+# Compiled JavaScript files
+lib/**/*.js
+lib/**/*.js.map
+
+# TypeScript v1 declaration files
+typings/
+
+# Node.js dependency directory
+node_modules/
+
+dist/
+
+.functions/fir-functions-9c002-firebase-adminsdk-fn49x-e30a8a6839.json
+
+./fir-functions-9c002-firebase-adminsdk-fn49x-e30a8a6839.json
+
+.env
+.env.local
+.env.staging
+.env.prod
