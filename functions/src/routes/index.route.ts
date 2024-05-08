@@ -7,6 +7,7 @@ import orderRouter from "./order.route.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import manufacturerRouter from "./manufacturer.route.js";
 import patientRouter from "./patient.route.js";
+import auditLogsRouter from "./auditlogs.route.js";
 
 const indexRouter: Router = express.Router();
 
@@ -18,4 +19,6 @@ indexRouter.use("/manufacturers", manufacturerRouter);
 indexRouter.use("/roles", roleRouter);
 indexRouter.use("/orders", orderRouter);
 indexRouter.use("/patients", patientRouter);
+indexRouter.use("/auditlogs", auditLogsRouter);
+
 export default indexRouter;

@@ -28,7 +28,7 @@ export const auditLoggerInterceptResponse = async (
                 params: req.params,
                 statusCode: res.statusCode,
                 action: response.audit.action ?? null,
-                email: getEmailValue(req.user.email, response.audit.email),
+                email: response.audit.email ?? null,
                 time: FieldValue.serverTimestamp(),
             };
             const auditLogService = new AuditLogService();
@@ -37,17 +37,6 @@ export const auditLoggerInterceptResponse = async (
         } else {
             return originalJson.call(this, response);
         }
-
-        function getEmailValue(userEmail:string, auditEmail:string) {
-            if (userEmail !== null && userEmail !== undefined) {
-                return userEmail;
-            } else if (auditEmail !== null && auditEmail !== undefined) {
-                return auditEmail;
-            } else {
-                return null;
-            }
-        }
     };
     next();
-
 };

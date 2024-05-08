@@ -13,4 +13,36 @@ export default class AuditLogService {
         const res = await auditLogCollection.add(auditLog);
         return res.id;
     };
+
+    getAuditLogs = async () => {
+        console.log("in service");
+        const snapshot = await auditLogCollection.get();
+        const data: AuditLog[] = [];
+        snapshot.forEach((doc) => {
+            data.push(doc.data() as AuditLog);
+        });
+        console.log(data,"data");
+        return data;
+    };
+
+    getAuditLogsById = async (
+        companyId:string,
+        userId:string) => {
+        let snapshot;
+        const data: AuditLog[] = [];
+        if (userId) {
+            snapshot = await auditLogCollection
+                .where("params.companyId", "==", companyId)
+                .where("userId", "==", userId)
+                .get();
+        }
+        snapshot = await auditLogCollection
+            .where("params.companyId", "==", companyId)
+            .get();
+
+        snapshot.forEach((doc) => {
+            data.push(doc.data() as AuditLog);
+        });
+        return data;
+    };
 }
