@@ -54,7 +54,7 @@ export class UserController {
         async (req: ExtendedExpressRequest, res: Response) => {
             //Step1: Allow only if have valid API key to create system admin
             if (req.headers["x-api-key"] != process.env.SYSTEM_ADMIN_KEY) {
-                throw new CustomError(ERROR_MESSAGES.UNAUTHORIZED, 401);
+                throw new CustomError(ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED, 401);
             }
             //Step2: Add system admin in DB
             const user: User = req.body;
@@ -136,5 +136,10 @@ export class UserController {
         console.log(req.body);
         const token = await this.userService.getToken(req.params.id);
         return res.status(200).json(new CustomResponse(true, "", { token }));
+    });
+
+    getNames = asyncHandler(async (req: Request, res: Response) => {
+        const names = await this.userService.getNames(req.query.name);
+        return res.status(200).json(new CustomResponse(true, "", { names }));
     });
 }

@@ -29,5 +29,6 @@ userRouter.put("/upload/", userController.updateUser);
 // userRouter.put('/:id/status', userController.updateUserStatus);
 userRouter.delete("/:id", userController.deleteUser);
 userRouter.get("/:id/token", userController.getToken);
+userRouter.get("/?name",userController.getNames);
 
 export default userRouter;

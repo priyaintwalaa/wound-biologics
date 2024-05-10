@@ -8,6 +8,7 @@ import EmailService from "./email.service.js";
 import { UserMapper } from "../mappers/user.mapper.js";
 import { AuthService } from "./auth.service.js";
 import { ERROR_MESSAGES } from "../constants/error.js";
+import { client } from "../config/typesense.config.js";
 
 const usersCollection = firebaseDB.collection(
     FIREBASE_CONSTANTS.FIRESTORE.USERS
@@ -93,6 +94,20 @@ export default class UserService {
 
         const authService = new AuthService();
         return authService.generateToken(userResponse);
+    };
+
+    getNames = async (name: any) => {
+        const search = {
+            q: `${name}`,
+            query_by: "firstname",
+        };
+        client
+            .collections(FIREBASE_CONSTANTS.FIRESTORE.USERS)
+            .documents()
+            .search(search)
+            .then((searchResults) => {
+                console.log(searchResults.hits);
+            });
     };
 
     userExists = async (email: string): Promise<boolean> => {

@@ -14,12 +14,12 @@ export function validateData(schema: z.ZodObject<any, any>) {
                     message: `${issue.path.join(".") ? `${issue.path.join(".")} is ` : ""}${issue.message}`,
                 }));
                 res.status(HttpStatusCodes.BAD_REQUEST).json({
-                    error: ERROR_MESSAGES.INVALID_DATA,
+                    error: ERROR_MESSAGES.MIDDLEWARE.INVALID_DATA,
                     details: errorMessages,
                 });
             } else {
                 res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-                    error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+                    error: ERROR_MESSAGES.MIDDLEWARE.INTERNAL_SERVER_ERROR,
                 });
             }
         }

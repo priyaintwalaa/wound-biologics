@@ -12,7 +12,7 @@ const errorHandler = (
     logger.error(err);
     res.status(err.statusCode || 500).json({
         success: false,
-        error: err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        error: err.message || ERROR_MESSAGES.MIDDLEWARE.INTERNAL_SERVER_ERROR,
     });
 };
 
