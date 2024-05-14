@@ -14,6 +14,7 @@ userRouter.post(
     validateData(userRegistrationSchema),
     userController.createSystemAdmin
 );
+userRouter.get("/",userController.getNames);
 userRouter.use(verifyToken);
 userRouter.use(verifyRole([Roles.SYSTEM_ADMIN]));
 userRouter.get("/:id", userController.getUser);
@@ -29,6 +30,6 @@ userRouter.put("/upload/", userController.updateUser);
 // userRouter.put('/:id/status', userController.updateUserStatus);
 userRouter.delete("/:id", userController.deleteUser);
 userRouter.get("/:id/token", userController.getToken);
-userRouter.get("/?name",userController.getNames);
+
 
 export default userRouter;

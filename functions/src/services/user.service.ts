@@ -68,12 +68,18 @@ export default class UserService {
 
         const { hashedText, salt } = hashRandomText(password);
         user.password = { hash: hashedText, salt };
+
+        const typseSenseData = client
+            .collections(FIREBASE_CONSTANTS.FIRESTORE.USERS)
+            .documents()
+            .create(user);
+
         const docRef = await usersCollection.add({
             ...user,
             isActive: true,
             createdAt: FieldValue.serverTimestamp(),
         });
-        return { id: docRef.id, password };
+        return { id: docRef.id, password, typseSenseData };
     };
 
     updateUser = async (user: User) => {
@@ -97,16 +103,22 @@ export default class UserService {
     };
 
     getNames = async (name: any) => {
-        const search = {
-            q: `${name}`,
+        console.log(name, "name in service");
+        const searchParameters = {
+            q: name,
             query_by: "firstname",
+            // sort_by:"createdAt:desc"
         };
         client
             .collections(FIREBASE_CONSTANTS.FIRESTORE.USERS)
             .documents()
-            .search(search)
+            .search(searchParameters)
             .then((searchResults) => {
-                console.log(searchResults.hits);
+                console.log(searchResults, "searchREsults");
+                return searchResults;
+            })
+            .catch((error) => {
+                return error;
             });
     };
 

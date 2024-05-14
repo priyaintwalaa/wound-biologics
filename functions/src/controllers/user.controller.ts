@@ -28,7 +28,7 @@ export class UserController {
     createUser = asyncHandler(async (req: Request, res: Response) => {
         console.log(req.body);
         const user: User = req.body;
-        const { id, password } = await this.userService.createUser(user);
+        const { id, password , typseSenseData} = await this.userService.createUser(user);
         await this.userService.sendCredsEmailToUser({
             firstname: user.firstname,
             lastname: user.lastname,
@@ -40,6 +40,7 @@ export class UserController {
             "User created successfully",
             {
                 id,
+                typseSenseData
             }
         );
         return res.status(200).json({
@@ -139,6 +140,7 @@ export class UserController {
     });
 
     getNames = asyncHandler(async (req: Request, res: Response) => {
+        console.log("name in controller",req.query.name);
         const names = await this.userService.getNames(req.query.name);
         return res.status(200).json(new CustomResponse(true, "", { names }));
     });

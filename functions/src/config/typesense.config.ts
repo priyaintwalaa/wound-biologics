@@ -5,10 +5,10 @@ export const client = new Typesense.Client({
     nodes: [
         {
             // host = your cluster url
-            host: "127.0.0.0.1", // e.g., https://xxx.a1.typesense.net
-            port: 8085,
+            host: "https://qholmefi1ubw9vjtp-1.a1.typesense.net", // e.g., https://xxx.a1.typesense.net
+            port: 443,
             protocol: "http",
         },
     ],
-    apiKey: "Oxj7jO37uWIO8vWH7gfi9oZKqpnA1j0M",
+    apiKey: "KvWW1nVbClDuwBiNI5FPCj0fx8NxNJoR",
 });
