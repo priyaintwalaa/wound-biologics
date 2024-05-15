@@ -8,13 +8,14 @@ import { validateData } from "../middlewares/validation.middleware.js";
 const userRouter: Router = express.Router();
 const userController: UserController = new UserController();
 
+
 //Create first system admin
 userRouter.post(
     "/system-admin",
     validateData(userRegistrationSchema),
     userController.createSystemAdmin
 );
-userRouter.get("/",userController.getNames);
+userRouter.get("/", userController.getNames);
 userRouter.use(verifyToken);
 userRouter.use(verifyRole([Roles.SYSTEM_ADMIN]));
 userRouter.get("/:id", userController.getUser);
@@ -30,6 +31,5 @@ userRouter.put("/upload/", userController.updateUser);
 // userRouter.put('/:id/status', userController.updateUserStatus);
 userRouter.delete("/:id", userController.deleteUser);
 userRouter.get("/:id/token", userController.getToken);
-
 
 export default userRouter;

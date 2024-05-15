@@ -9,6 +9,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "../swagger.json" assert { type: "json" }; // Adjust the path to your Swagger JSON file
 import { ExtendedExpressRequest } from "./models/extendedExpressRequest.js";
 import { auditLoggerInterceptResponse } from "./middlewares/audit-log.middleware.js";
+import "./typeSenseCollection/user.js";
 
 const app: Express = express();
 

@@ -142,6 +142,7 @@ export class UserController {
     getNames = asyncHandler(async (req: Request, res: Response) => {
         console.log("name in controller",req.query.name);
         const names = await this.userService.getNames(req.query.name);
+        console.log("namesin controller after querty",names);
         return res.status(200).json(new CustomResponse(true, "", { names }));
     });
 }

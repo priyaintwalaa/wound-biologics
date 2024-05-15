@@ -1,40 +1,84 @@
+import { CollectionCreateSchema } from "typesense/lib/Typesense/Collections.js";
 import { client } from "../config/typesense.config.js";
+import { firebaseDB } from "../config/firebase.config.js";
+import { FIREBASE_CONSTANTS } from "../constants/firebase.js";
 
-export const createTypesenseUserCollections=async() =>{
-    // Every 'collection' in Typesense needs a schema. A collection only
-    // needs to be created one time before you index your first document.
-    //
-    // Alternatively, use auto schema detection:
-    // https://typesense.org/docs/latest/api/collections.html#with-auto-schema-detection
-    const usersCollection = {
-        name: "users",
-        fields: [
-            { name: "id", type: "string" },
-            { name: "username", type: "string" },
-            { name: "firstname", type: "string" },
-            { name: "lastname", type: "string" },
-            { name: "email", type: "string" },
-            { name: "role", type: "string" },
-            { name: "roleId", type: "string" },
-            { name: "companyId", type: "string" },
-            { name: "isActive", type: "boolean" },
-            { name: "resetPasswordToken", type: "object" },
-            // { name: "resetPasswordToken.hash", type: "string" },
-            // { name: "resetPasswordToken.salt", type: "string" },
-            { name: "resetPasswordToken.expiredTime", type: "datetime" },
-            { name: "currentOtp", type: "object" },
-            // { name: "currentOtp.hash", type: "string" },
-            // { name: "currentOtp.salt", type: "string" },
-            // { name: "currentOtp.expiredTime", type: "datetime" },
-            // { name: "currentOtp.isVerified", type: "boolean" },
-            // { name: "currentOtp.createdTime", type: "datetime" },
-            { name: "createdAt", type: "FeildValue" },
-            { name: "isLocked", type: "boolean" },
-            { name: "invalidAttempt", type: "object" },
-            // { name: "invalidAttempt.count", type: "integer" },
-            // { name: "invalidAttempt.lastAttemptTime", type: "datetime" },
-        ],
-    };
-
-    await client.collections().create(usersCollection);
+const usersCollection = firebaseDB.collection(
+    FIREBASE_CONSTANTS.FIRESTORE.USERS
+);
+const schema: CollectionCreateSchema = {
+    name: "users",
+    fields: [
+        { name: "id", type: "string" },
+        { name: "firstname", type: "string" },
+        { name: "lastname", type: "string" },
+    ],
 };
+(async () => {
+    try {
+        const collections = await client.collections().retrieve();
+        const collectionNames = collections.map(
+            (collection) => collection.name
+        );
+        if (!collectionNames.includes("users")) {
+            await client.collections().create(schema);
+        }
+
+        const firestoreUsers = [];
+        const userSnapshot = await usersCollection.get();
+        userSnapshot.forEach((doc) => {
+            const userData = doc.data();
+            firestoreUsers.push({ id: doc.id, ...userData });
+        });
+        const usersToImport = firestoreUsers.map((user) => ({
+            data: JSON.stringify(user),
+        }));
+        
+        await client.collections("users").documents().import(usersToImport);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+})();
+
+// client.collections().create(schema);
+// (async () => {
+//     try {
+//         const collections = await client.collections().retrieve();
+//         const collectionNames = collections.map(
+//             (collection) => collection.name
+//         );
+
+//         if (!collectionNames.includes("users")) {
+//             await client.collections().create(schema);
+//             console.log("Collection users created successfully");
+//         }
+//         const firestoreUsers = [];
+//         const userSnapshot = await usersCollection.get();
+//         userSnapshot.forEach((doc) => {
+//             firestoreUsers.push({ id: doc.id, ...doc.data() });
+//         });
+
+//         console.log(firestoreUsers, "firestoreUsers");
+//         const usersToImport:any = firestoreUsers.map(book => JSON.stringify(book));
+//         console.log(usersToImport, "usersToImport");
+//         // const usersObjects = usersToImport.map((userString) => {
+//         //     const userObj = JSON.parse(userString);
+//         //     return {
+//         //         data: JSON.stringify({
+//         //             ...userObj,
+//         //             isActive: userObj.isActive, // Add the isActive field explicitly
+//         //         }),
+//         //     };
+//         // });
+
+//         client.collections("users").documents().import(usersToImport);
+//         console.log("Collection users already exists...");
+//     } catch (error) {
+//         console.log("eeeeeeeeeeeee",error.message);
+//         console.error("Error:", error);
+//     }
+// })();
+// .then(async () => {
+
+// })
+// .catch((error) => console.error("Error creating collection:", error));
