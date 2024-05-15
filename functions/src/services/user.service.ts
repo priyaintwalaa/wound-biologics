@@ -9,6 +9,7 @@ import { UserMapper } from "../mappers/user.mapper.js";
 import { AuthService } from "./auth.service.js";
 import { ERROR_MESSAGES } from "../constants/error.js";
 import { client } from "../config/typesense.config.js";
+import { schema } from "../typeSenseCollection/user.js";
 
 const usersCollection = firebaseDB.collection(
     FIREBASE_CONSTANTS.FIRESTORE.USERS
@@ -74,6 +75,17 @@ export default class UserService {
             isActive: true,
             createdAt: FieldValue.serverTimestamp(),
         });
+
+        const collections = await client.collections().retrieve();
+        const collectionNames = collections.map(
+            (collection) => collection.name
+        );
+        if (!collectionNames.includes("users")) {
+            await client.collections().create(schema);
+        }
+        const docData = await docRef.get();
+
+        await client.collections("users").documents().import([docData.data()]);
         return { id: docRef.id, password };
     };
 
