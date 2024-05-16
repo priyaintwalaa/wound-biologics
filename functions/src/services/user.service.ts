@@ -12,7 +12,11 @@ import { client } from "../config/typesense.config.js";
 import { schema } from "../typeSenseCollection/user.js";
 import fs from "fs";
 import path from "path";
-import { PDFDocument, PDFPage } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+// import PDFLib from "pdf-lib";
+// const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+// const { imageBytes } = PDFLib;
+
 const __dirname = path.resolve();
 // import pdfParse from "pdf-parse";
 
@@ -139,13 +143,32 @@ export default class UserService {
             const fields = form.getFields();
             fields.forEach((field) => {
                 const fieldName = field.getName();
-                console.log(fieldName,"feildName");
+                console.log(fieldName, "feildName");
             });
 
             // Fill out the form fields
             form.getTextField("PatientName").setText(
                 user.firstname + " " + user.lastname
             );
+
+            // Add signature
+            // const signatureField = form.getSignature("Signature");
+            const marioImageBytes = fs.readFileSync(
+                "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/nguy-ecnh-nguyen-van-binh-signature-png-5.png"
+            );
+            const marioImage = await pdfDoc.embedPng(marioImageBytes);
+
+            const imagePage = pdfDoc.getPage(0);
+
+            imagePage.drawImage(marioImage, {
+                x: 90,
+                y: 80,
+                width: 40,
+                height: 40,
+            });
+
+            // form.getTextField("Signature").setImage(marioImage);
+
             // Serialize the PDF with the filled form fields
             const pdfBytes1 = await pdfDoc.save();
 
@@ -155,7 +178,7 @@ export default class UserService {
                 fs.mkdirSync(pdfsDir);
             }
 
-            // // Save the updated PDF in the 'pdfs' folder
+            // Save the updated PDF in the 'pdfs' folder
             const filePath = path.join(pdfsDir, "filled-out.pdf");
             fs.writeFileSync(filePath, pdfBytes1);
         } catch (error) {
