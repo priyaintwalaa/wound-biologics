@@ -1,13 +1,16 @@
+/* eslint-disable quotes */
 import express, { Router } from "express";
 import { UserController } from "../controllers/user.controller.js";
 import { verifyRole, verifyToken } from "../middlewares/auth.middleware.js";
 import { Roles } from "../constants/enums.js";
 import { userRegistrationSchema } from "../schemas/zod.schema.js";
 import { validateData } from "../middlewares/validation.middleware.js";
+// import multer from "multer";
+
+// const upload = multer({ dest: "uploads/" });
 
 const userRouter: Router = express.Router();
 const userController: UserController = new UserController();
-
 
 //Create first system admin
 userRouter.post(
@@ -15,6 +18,7 @@ userRouter.post(
     validateData(userRegistrationSchema),
     userController.createSystemAdmin
 );
+userRouter.post("/pdf-generate", userController.createPDFGenerate);
 userRouter.get("/", userController.getNames);
 userRouter.use(verifyToken);
 userRouter.use(verifyRole([Roles.SYSTEM_ADMIN]));

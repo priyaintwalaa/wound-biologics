@@ -12,6 +12,7 @@ export function verifyToken(
     res: Response,
     next: NextFunction
 ) {
+    console.log("in verifyToken");
     const authHeader = req.header("Authorization");
     if (!authHeader) return next(new CustomError(ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED, 401));
     // Split header and check format

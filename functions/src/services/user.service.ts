@@ -10,6 +10,11 @@ import { AuthService } from "./auth.service.js";
 import { ERROR_MESSAGES } from "../constants/error.js";
 import { client } from "../config/typesense.config.js";
 import { schema } from "../typeSenseCollection/user.js";
+import fs from "fs";
+import path from "path";
+import { PDFDocument, PDFPage } from "pdf-lib";
+const __dirname = path.resolve();
+// import pdfParse from "pdf-parse";
 
 const usersCollection = firebaseDB.collection(
     FIREBASE_CONSTANTS.FIRESTORE.USERS
@@ -121,6 +126,41 @@ export default class UserService {
             .documents()
             .search(searchParameters);
         return result.hits;
+    };
+
+    createPDFGenerate = async (user: User) => {
+        try {
+            const pdfBytes = fs.readFileSync(
+                "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/pdfToChange.pdf"
+            );
+
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const form = pdfDoc.getForm();
+            const fields = form.getFields();
+            fields.forEach((field) => {
+                const fieldName = field.getName();
+                console.log(fieldName,"feildName");
+            });
+
+            // Fill out the form fields
+            form.getTextField("PatientName").setText(
+                user.firstname + " " + user.lastname
+            );
+            // Serialize the PDF with the filled form fields
+            const pdfBytes1 = await pdfDoc.save();
+
+            // Create the 'pdfs' folder if it doesn't exist
+            const pdfsDir = path.join(__dirname, "pdfs");
+            if (!fs.existsSync(pdfsDir)) {
+                fs.mkdirSync(pdfsDir);
+            }
+
+            // // Save the updated PDF in the 'pdfs' folder
+            const filePath = path.join(pdfsDir, "filled-out.pdf");
+            fs.writeFileSync(filePath, pdfBytes1);
+        } catch (error) {
+            return error.message;
+        }
     };
 
     userExists = async (email: string): Promise<boolean> => {

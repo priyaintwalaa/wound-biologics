@@ -11,6 +11,7 @@ import { ExtendedExpressRequest } from "./models/extendedExpressRequest.js";
 import { auditLoggerInterceptResponse } from "./middlewares/audit-log.middleware.js";
 import "./typeSenseCollection/user.js";
 
+
 const app: Express = express();
 
 app.use(cors());

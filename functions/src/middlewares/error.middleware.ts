@@ -9,7 +9,6 @@ const errorHandler = (
     res: Response,
     _next: NextFunction
 ) => {
-    console.log("syantac errpr");
     logger.error(err);
     res.status(err.statusCode || 500).json({
         success: false,

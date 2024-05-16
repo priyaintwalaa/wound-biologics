@@ -28,7 +28,8 @@ export class UserController {
     createUser = asyncHandler(async (req: Request, res: Response) => {
         console.log(req.body);
         const user: User = req.body;
-        const { id, password , typseSenseData} = await this.userService.createUser(user);
+        const { id, password, typseSenseData } =
+            await this.userService.createUser(user);
         await this.userService.sendCredsEmailToUser({
             firstname: user.firstname,
             lastname: user.lastname,
@@ -40,7 +41,7 @@ export class UserController {
             "User created successfully",
             {
                 id,
-                typseSenseData
+                typseSenseData,
             }
         );
         return res.status(200).json({
@@ -55,7 +56,10 @@ export class UserController {
         async (req: ExtendedExpressRequest, res: Response) => {
             //Step1: Allow only if have valid API key to create system admin
             if (req.headers["x-api-key"] != process.env.SYSTEM_ADMIN_KEY) {
-                throw new CustomError(ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED, 401);
+                throw new CustomError(
+                    ERROR_MESSAGES.MIDDLEWARE.UNAUTHORIZED,
+                    401
+                );
             }
             //Step2: Add system admin in DB
             const user: User = req.body;
@@ -140,9 +144,18 @@ export class UserController {
     });
 
     getNames = asyncHandler(async (req: Request, res: Response) => {
-        console.log("name in controller",req.query.name);
+        console.log("name in controller", req.query.name);
         const names = await this.userService.getNames(req.query.name);
-        console.log("namesin controller after querty",names);
+        console.log("namesin controller after querty", names);
         return res.status(200).json(new CustomResponse(true, "", { names }));
+    });
+
+    createPDFGenerate = asyncHandler(async (req: Request, res: Response) => {
+        try {
+            const data = await this.userService.createPDFGenerate(req.body);
+            return res.status(200).json(new CustomResponse(true, "", { data }));
+        } catch (error) {
+            console.log(error.message, "in controller");
+        }
     });
 }
