@@ -135,10 +135,8 @@ export default class UserService {
     createPDFGenerate = async (user: User) => {
         try {
             const pdfBytes = fs.readFileSync(
-                path.join(__dirname, "..","..","functions","pdfToChange.pdf")
+                "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/pdfToChange.pdf"
             );
-            // "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/pdfToChange.pdf"
-            // );
 
             const pdfDoc = await PDFDocument.load(pdfBytes);
             const form = pdfDoc.getForm();
@@ -156,16 +154,8 @@ export default class UserService {
             // Add signature
             // const signatureField = form.getSignature("Signature");
             const marioImageBytes = fs.readFileSync(
-                path.join(
-                    __dirname,
-                    "..",
-                    "..",
-                    "functions",
-                    "nguy-ecnh-nguyen-van-binh-signature-png-5.png"
-                )
+                "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/nguy-ecnh-nguyen-van-binh-signature-png-5.png"
             );
-            // "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/nguy-ecnh-nguyen-van-binh-signature-png-5.png"
-            // );
             const marioImage = await pdfDoc.embedPng(marioImageBytes);
 
             const imagePage = pdfDoc.getPage(0);
