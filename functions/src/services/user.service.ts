@@ -135,8 +135,10 @@ export default class UserService {
     createPDFGenerate = async (user: User) => {
         try {
             const pdfBytes = fs.readFileSync(
-                "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/pdfToChange.pdf"
+                path.join(__dirname, "..","..","functions","pdfToChange.pdf")
             );
+            // "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/pdfToChange.pdf"
+            // );
 
             const pdfDoc = await PDFDocument.load(pdfBytes);
             const form = pdfDoc.getForm();
@@ -154,8 +156,16 @@ export default class UserService {
             // Add signature
             // const signatureField = form.getSignature("Signature");
             const marioImageBytes = fs.readFileSync(
-                "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/nguy-ecnh-nguyen-van-binh-signature-png-5.png"
+                path.join(
+                    __dirname,
+                    "..",
+                    "..",
+                    "functions",
+                    "nguy-ecnh-nguyen-van-binh-signature-png-5.png"
+                )
             );
+            // "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/nguy-ecnh-nguyen-van-binh-signature-png-5.png"
+            // );
             const marioImage = await pdfDoc.embedPng(marioImageBytes);
 
             const imagePage = pdfDoc.getPage(0);
@@ -167,7 +177,8 @@ export default class UserService {
                 height: 40,
             });
 
-            // form.getTextField("Signature").setImage(marioImage);
+            //adding Signature in City Feild
+            form.getTextField("City").setImage(marioImage);
 
             // Serialize the PDF with the filled form fields
             const pdfBytes1 = await pdfDoc.save();
