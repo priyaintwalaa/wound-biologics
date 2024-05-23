@@ -1,6 +1,5 @@
 import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
-// import path from "path";
 import indexRouter from "./routes/index.route.js";
 import CustomError from "./models/customError.js";
 import errorHandler from "./middlewares/error.middleware.js";

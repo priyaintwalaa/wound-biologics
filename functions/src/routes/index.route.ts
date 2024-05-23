@@ -8,11 +8,13 @@ import { verifyToken } from "../middlewares/auth.middleware.js";
 import manufacturerRouter from "./manufacturer.route.js";
 import patientRouter from "./patient.route.js";
 import auditLogsRouter from "./auditlogs.route.js";
+import driveRouter from "./drive.route.js";
 
 const indexRouter: Router = express.Router();
 
 indexRouter.use("/auth", authRouter);
 indexRouter.use("/users", userRouter);
+indexRouter.use("/drive", driveRouter);
 indexRouter.use(verifyToken);
 indexRouter.use("/companies", companyRouter);
 indexRouter.use("/manufacturers", manufacturerRouter);

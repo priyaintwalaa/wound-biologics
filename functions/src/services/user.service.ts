@@ -12,10 +12,7 @@ import { client } from "../config/typesense.config.js";
 import { schema } from "../typeSenseCollection/user.js";
 import fs from "fs";
 import path from "path";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-// import PDFLib from "pdf-lib";
-// const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
-// const { imageBytes } = PDFLib;
+import { PDFDocument} from "pdf-lib";
 
 const __dirname = path.resolve();
 // import pdfParse from "pdf-parse";
@@ -132,10 +129,10 @@ export default class UserService {
         return result.hits;
     };
 
-    createPDFGenerate = async (user: User) => {
+    generatePDF = async (user: User) => {
         try {
             const pdfBytes = fs.readFileSync(
-                "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/pdfToChange.pdf"
+                "../pdfToChange.pdf"
             );
 
             const pdfDoc = await PDFDocument.load(pdfBytes);
@@ -154,7 +151,7 @@ export default class UserService {
             // Add signature
             // const signatureField = form.getSignature("Signature");
             const marioImageBytes = fs.readFileSync(
-                "/home/bacancy/Documents/Wound-biologics'/wb-backend-priya/functions/nguy-ecnh-nguyen-van-binh-signature-png-5.png"
+                "../nguy-ecnh-nguyen-van-binh-signature-png-5.png"
             );
             const marioImage = await pdfDoc.embedPng(marioImageBytes);
 

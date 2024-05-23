@@ -18,7 +18,7 @@ userRouter.post(
     validateData(userRegistrationSchema),
     userController.createSystemAdmin
 );
-userRouter.post("/pdf-generate", userController.createPDFGenerate);
+userRouter.post("/pdf-generate", userController.generatePDF);
 userRouter.get("/", userController.getNames);
 userRouter.use(verifyToken);
 userRouter.use(verifyRole([Roles.SYSTEM_ADMIN]));

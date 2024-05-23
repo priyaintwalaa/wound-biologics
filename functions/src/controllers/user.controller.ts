@@ -150,9 +150,9 @@ export class UserController {
         return res.status(200).json(new CustomResponse(true, "", { names }));
     });
 
-    createPDFGenerate = asyncHandler(async (req: Request, res: Response) => {
+    generatePDF = asyncHandler(async (req: Request, res: Response) => {
         try {
-            const data = await this.userService.createPDFGenerate(req.body);
+            const data = await this.userService.generatePDF(req.body);
             return res.status(200).json(new CustomResponse(true, "", { data }));
         } catch (error) {
             console.log(error.message, "in controller");
