@@ -9,13 +9,16 @@ import swaggerDocument from "../swagger.json" assert { type: "json" }; // Adjust
 import { ExtendedExpressRequest } from "./models/extendedExpressRequest.js";
 import { auditLoggerInterceptResponse } from "./middlewares/audit-log.middleware.js";
 import "./typeSenseCollection/user.js";
-
+// import bodyParser from "body-parser";
+// import { urlencoded } from "body-parser";
 
 const app: Express = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// app.use(bodyParser.urlencoded({ extended: true }));
 app.use((req: ExtendedExpressRequest, res: Response, next: NextFunction) => {
     // Check for headers or properties specific to Supertest
     if (req.header("supertest")) {
@@ -25,13 +28,11 @@ app.use((req: ExtendedExpressRequest, res: Response, next: NextFunction) => {
     }
     next();
 });
-
 app.use(auditLoggerInterceptResponse);
 // app.use(express.static(path.join(__dirname, "build")));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/", indexRouter);
-
 // app.get("/logger", (_, res) => {
 //     Logger.error("This is an error log");
 //     Logger.warn("This is a warn log");

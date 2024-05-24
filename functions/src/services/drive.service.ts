@@ -19,6 +19,8 @@ export default class DriveService {
     uploadPdf = async (file) => {
         try {
             console.log("hello 2");
+            console.log(file,"file");
+            console.log(file.mimeType,"mimetype");
             const { data } = await google
                 .drive({ version: "v3", auth: auth })
                 .files.create({
