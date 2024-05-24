@@ -3,7 +3,8 @@ import asyncHandler from "../utils/catchAsync.util.js";
 import DriveService from "../services/drive.service.js";
 // import os from "os";
 // import fs from "fs";
-import { Readable } from "stream";
+// import { Readable } from "stream";
+import stream from "stream";
 import busboy from "busboy";
 import { google } from "googleapis";
 import path from "path";
@@ -35,7 +36,7 @@ export class DriveController {
         try {
             const bb = busboy({ headers: req.headers });
 
-            bb.on("file", async (name, file, info) => {
+            bb.on("file",async (name, file, info) => {
                 const { filename, encoding, mimeType } = info;
                 console.log(
                     `File [${name}]: filename: %j, encoding: %j, mimeType: %j`,
@@ -43,48 +44,44 @@ export class DriveController {
                     encoding,
                     mimeType
                 );
+                try {
+                    // Create a new readable stream from the file data
+                    const fileStream = new stream.PassThrough();
 
-                const buffers = [];
+                    // Pipe the file data to the readable stream
+                    file.pipe(fileStream);
 
-                file.on("data", (data) => {
-                    buffers.push(data);
-                });
-
-                file.on("end", async () => {
-                    const fileBuffer = Buffer.concat(buffers);
-                    const fileStream = Readable.from(fileBuffer); // Create a readable stream from the Buffer
-
+                    // Upload the file to Google Drive
                     const { data } = await google
                         .drive({ version: "v3", auth: auth })
                         .files.create({
-                            media: {
-                                mimeType: mimeType,
-                                body: fileStream, // Pass the readable stream as the request body
-                            },
+                            media: { mimeType: mimeType, body: fileStream },
                             requestBody: {
                                 name: filename,
-                                parents: ["1HyWYUFaaBJxKXZS4-8YvNDG3J5DDJll2"], //folder id in which file should be uploaded
+                                parents: ["1HyWYUFaaBJxKXZS4-8YvNDG3J5DDJll2"], // Replace with your desired folder ID
                             },
                             fields: "id,name",
                         });
 
-                    console.log(
-                        `File uploaded successfully -> ${JSON.stringify(data)}`
-                    );
-                    res.json({
-                        status: 1,
-                        message: "success",
-                        file_id: data.id,
-                        file_name: data.name,
-                    });
+                    console.log("File uploaded to Google Drive:", data);
+                } catch (err) {
+                    console.error("Error uploading file to Google Drive:", err);
+                }
+                file.on("data", (data) => {
+                    console.log(`File [${name}] got ${data?.length} bytes`);
+                }).on("close", () => {
+                    console.log(`File [${name}] done`);
                 });
             });
-
+            bb.on("field", (name, val) => {
+                console.log(`Field [${name}]: value: %j`, val);
+            });
             bb.on("close", () => {
                 console.log("Done parsing form!");
+                res.status(200).send({ message: "Done parsing form!" });
             });
 
-            req.pipe(bb);
+            bb.end(req.body);
         } catch (error) {
             console.log(error);
             res.json({ status: -1, message: "failure", err: error.message });
