@@ -18,7 +18,11 @@ const auth = new google.auth.GoogleAuth({
     keyFile: KEY_FILE_PATH,
     scopes: SCOPES,
 });
-
+function getOrdinal(n: number): string {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return s[(v - 20) % 10] || s[v] || s[0];
+}
 export class DriveController {
     private driveService: DriveService;
 
@@ -29,8 +33,11 @@ export class DriveController {
     uploadPdf = asyncHandler(async (req: Request, res: Response) => {
         try {
             const bb = busboy({ headers: req.headers });
-            const fileList: { filename: string; stream: stream.PassThrough }[] =
-                [];
+            const fileList: {
+                filename: string;
+                stream: stream.PassThrough;
+                mimeType: string;
+            }[] = [];
             let totalFileSize = 0;
             const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
             let hasExceededLimit = false;
@@ -44,6 +51,15 @@ export class DriveController {
                     mimeType
                 );
 
+                // Check if the file is a PDF
+                if (mimeType !== "application/pdf") {
+                    console.log(
+                        `File [${filename}] is not a PDF, skipping upload.`
+                    );
+                    fileList.push({ filename, stream: null, mimeType }); // Add the non-PDF file to the list
+                    return file.resume(); // Discard non-PDF files
+                }
+
                 // Check if the maximum number of files has been reached
                 if (fileList.length >= 5) {
                     console.error("Maximum number of files exceeded");
@@ -55,7 +71,7 @@ export class DriveController {
                 const fileStream = new stream.PassThrough();
 
                 // Store the file information in the list
-                fileList.push({ filename, stream: fileStream });
+                fileList.push({ filename, stream: fileStream, mimeType });
 
                 // Pipe the file data to the readable stream
                 file.pipe(fileStream);
@@ -98,33 +114,55 @@ export class DriveController {
                 }
 
                 // Upload the files to Google Drive
-                for (const { filename, stream } of fileList) {
+                const uploadResponses = [];
+                for (const [
+                    index,
+                    { filename, stream, mimeType },
+                ] of fileList.entries()) {
                     try {
-                        const { data } = await google
-                            .drive({ version: "v3", auth: auth })
-                            .files.create({
-                                media: {
-                                    mimeType: "application/pdf",
-                                    body: stream,
-                                },
-                                requestBody: {
-                                    name: filename,
-                                    parents: [
-                                        "1HyWYUFaaBJxKXZS4-8YvNDG3J5DDJll2",
-                                    ], // Replace with your desired folder ID
-                                },
-                                fields: "id,name",
-                            });
-                        console.log("File uploaded to Google Drive:", data);
+                        if (mimeType === "application/pdf") {
+                            const { data } = await google
+                                .drive({ version: "v3", auth: auth })
+                                .files.create({
+                                    media: {
+                                        mimeType: "application/pdf",
+                                        body: stream,
+                                    },
+                                    requestBody: {
+                                        name: filename,
+                                        parents: [
+                                            "1HyWYUFaaBJxKXZS4-8YvNDG3J5DDJll2",
+                                        ], // Replace with your desired folder ID
+                                    },
+                                    fields: "id,name",
+                                });
+                            console.log("File uploaded to Google Drive:", data);
+                            const ordinal = getOrdinal(index + 1);
+                            uploadResponses.push(
+                                `${index + 1}${ordinal} file uploaded true`
+                            );
+                        } else {
+                            const ordinal = getOrdinal(index + 1);
+                            uploadResponses.push(
+                                `${index + 1}${ordinal} file uploaded false`
+                            );
+                        }
                     } catch (err) {
                         console.error(
                             "Error uploading file to Google Drive:",
                             err
                         );
+                        const ordinal = getOrdinal(index + 1);
+                        uploadResponses.push(
+                            `${index + 1}${ordinal} file uploaded false`
+                        );
                     }
                 }
 
-                res.status(200).send({ message: "Done parsing form!" });
+                res.status(200).send({
+                    message: "Done parsing form!",
+                    uploadResponses,
+                });
             });
 
             bb.end(req.body);
@@ -133,7 +171,7 @@ export class DriveController {
             res.json({ status: -1, message: "failure", err: error.message });
         }
     });
-
+    
     getAllFiles = asyncHandler(async (req: Request, res: Response) => {
         const data = await this.driveService.getAllFiles();
         return res.status(200).json({ data, message: "Done" });
